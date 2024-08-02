@@ -3,10 +3,10 @@ import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import Fieldset from 'primevue/fieldset'
 
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 let valueToPush = ref(null)
 let queue = ref([])
-
+let history = ref([])
 /**
  * Add a value to the queue.
  *
@@ -15,6 +15,8 @@ let queue = ref([])
 let push = (value) => {
   queue.value.unshift(value)
   valueToPush.value = null
+
+  updateHistory('PUSH', value, null)
 }
 
 /**
@@ -23,6 +25,8 @@ let push = (value) => {
 let add = () => {
   let addAux = 0
   addAux = queue.value[0] + queue.value[1]
+  updateHistory('ADD', queue.value[0] + ' + ' + queue.value[1], addAux)
+
   queue.value.splice(0, 2, addAux)
 }
 
@@ -32,6 +36,7 @@ let add = () => {
 let sub = () => {
   let subAux = 0
   subAux = queue.value[0] - queue.value[1]
+  updateHistory('SUB', queue.value[0] + ' - ' + queue.value[1], subAux)
   queue.value.splice(0, 2, subAux)
 }
 
@@ -41,6 +46,7 @@ let sub = () => {
 let mul = () => {
   let mulAux = 0
   mulAux = queue.value[0] * queue.value[1]
+  updateHistory('MUL', queue.value[0] + ' * ' + queue.value[1], mulAux)
   queue.value.splice(0, 2, mulAux)
 }
 
@@ -50,6 +56,7 @@ let mul = () => {
 let div = () => {
   let divAux = 0
   divAux = queue.value[0] / queue.value[1]
+  updateHistory('DIV', queue.value[0] + ' * ' + queue.value[1], divAux)
   queue.value.splice(0, 2, divAux)
 }
 
@@ -58,6 +65,8 @@ let div = () => {
  */
 let dup = () => {
   push(queue.value[0])
+
+  updateHistory('DUP', queue.value[0], null)
 }
 
 /**
@@ -65,6 +74,8 @@ let dup = () => {
  */
 let pop = () => {
   queue.value.splice(0, 1)
+
+  updateHistory('DUP', queue.value[0], null)
 }
 
 /**
@@ -74,7 +85,25 @@ let swap = () => {
   let valAux = queue.value[0]
   queue.value[0] = queue.value[1]
   queue.value[1] = valAux
+
+  updateHistory('SWAP', queue.value[1], queue.value[0])
 }
+
+let updateHistory = (operation, value, result) => {
+  history.value.push({
+    operation: operation,
+    value: value,
+    result: result
+  })
+  localStorage.setItem('operations-history', JSON.stringify(history.value))
+}
+
+onMounted(() => {
+  let historyAux = localStorage.getItem('operations-history')
+  if (historyAux) {
+    history.value = JSON.parse(historyAux)
+  }
+})
 </script>
 
 <template>
@@ -106,7 +135,47 @@ let swap = () => {
         <Button label="SWAP" class="operation-button" @click="swap" />
       </div>
     </div>
-    <div></div>
+    <div class="history-container">
+      <div>History</div>
+      <div v-for="historyItem of history.reverse()">
+        <div
+          v-if="
+            historyItem.operation == 'PUSH' ||
+            historyItem.operation == 'DUP' ||
+            historyItem.operation == 'POP'
+          "
+          class="history-item"
+        >
+          <span>
+            {{ historyItem.operation }}
+          </span>
+          <span>
+            {{ historyItem.value }}
+          </span>
+        </div>
+        <div v-else-if="historyItem.operation == 'SWAP'" class="history-item">
+          <span>
+            {{ historyItem.operation }}
+          </span>
+          <span>
+            {{ historyItem.value }}
+            <i class="pi pi-arrow-right-arrow-left"></i>
+            {{ historyItem.result }}
+          </span>
+        </div>
+        <div v-else class="history-item">
+          <span>
+            {{ historyItem.operation }}
+          </span>
+          <span>
+            {{ historyItem.value }}
+          </span>
+          <span>
+            {{ historyItem.result }}
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -121,7 +190,7 @@ let swap = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 66%;
+  width: 55%;
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-radius: 12px;
   padding: 32px;
@@ -167,5 +236,32 @@ let swap = () => {
   .operations-container
   .operation-button {
   width: 30%;
+}
+
+.operator-machine-page-container .history-container {
+  display: flex;
+  flex-direction: column;
+  width: 45%;
+  padding-left: 24px;
+}
+
+.operator-machine-page-container .history-container div:first-child {
+  margin-bottom: 12px;
+}
+
+.operator-machine-page-container .history-container .history-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.operator-machine-page-container .history-container .history-item span:first-child {
+  background-color: #10b981;
+  padding: 8px;
+  border-radius: 8px;
+  color: #fff;
 }
 </style>
