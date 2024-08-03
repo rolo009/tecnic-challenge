@@ -217,7 +217,7 @@ let startMachine = () => {
     }
   }
 
-  console.log(queue.value)
+  operationString.value = ''
 }
 
 let updateHistory = (operation, value, result) => {
@@ -234,6 +234,10 @@ let updateHistory = (operation, value, result) => {
   localStorage.setItem('operations-history', JSON.stringify(history.value))
 }
 
+let cleanHistory = () => {
+  history.value = []
+}
+
 onMounted(() => {
   let historyAux = localStorage.getItem('operations-history')
   if (historyAux) {
@@ -246,7 +250,11 @@ onMounted(() => {
   <div class="operator-machine-page-container" :class="autoMachine ? 'auto-machine-container' : ''">
     <div class="operator-machine-container" v-if="autoMachine">
       <div class="input-container">
-        <InputText type="text" v-model="operationString" />
+        <InputText
+          type="text"
+          v-model="operationString"
+          placeholder="PUSH 3 PUSH 4 ADD DUP MUL POP SUB"
+        />
         <Button label="SEND" @click="startMachine()" />
       </div>
       <Fieldset legend="Queue" v-if="queue.length">
@@ -264,7 +272,7 @@ onMounted(() => {
 
     <div class="operator-machine-container" v-if="!autoMachine">
       <div class="input-container">
-        <InputNumber v-model="valueToPush" inputId="integeronly" class="w-64" />
+        <InputNumber v-model="valueToPush" inputId="integeronly" class="w-64" placeholder="3" />
         <Button label="PUSH" @click="push(valueToPush)" />
       </div>
 
@@ -290,7 +298,12 @@ onMounted(() => {
       </div>
     </div>
     <div class="machine-history-container">
-      <History :fullHistory="true" :autoMachine="autoMachine" :history="history" />
+      <History
+        :fullHistory="true"
+        :autoMachine="autoMachine"
+        :history="history"
+        @cleanHistory="cleanHistory()"
+      />
     </div>
   </div>
 </template>
@@ -314,6 +327,7 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-radius: 12px;
   padding: 32px;
+  max-height: 450px;
 }
 
 .auto-machine-container .operator-machine-container {

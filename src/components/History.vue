@@ -1,4 +1,8 @@
 <script setup>
+import Button from 'primevue/button'
+
+const emit = defineEmits(['cleanHistory'])
+
 const props = defineProps({
   fullHistory: {
     type: Boolean,
@@ -17,6 +21,11 @@ const props = defineProps({
 const formatDate = (value) => {
   return moment(String(value)).format('DD/MM/YYYY')
 }
+
+let cleanHistory = () => {
+  localStorage.removeItem('operations-history')
+  emit('cleanHistory')
+}
 </script>
 
 <template>
@@ -24,7 +33,10 @@ const formatDate = (value) => {
     class="history-container"
     :class="autoMachine ? 'auto-history-items' : 'manual-history-container'"
   >
-    <h3 class="history-title">History</h3>
+    <div class="history-header-container">
+      <h3 class="history-title">History</h3>
+      <Button label="Clear" @click="cleanHistory()" />
+    </div>
     <div class="history-items-container" v-if="history.length > 0">
       <div v-for="historyItem of history">
         <div
@@ -79,11 +91,17 @@ const formatDate = (value) => {
   width: 100%;
 }
 
+.history-container .history-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .history-items-container {
   display: flex;
   flex-direction: column;
   padding-left: 24px;
-  height: 500px;
+  height: 420px;
   overflow: auto;
 }
 
