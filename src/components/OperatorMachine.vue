@@ -1,28 +1,36 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Fieldset from 'primevue/fieldset'
-
 import { useToast } from 'primevue/usetoast'
-
+import History from './History.vue'
+const props = defineProps({
+  autoMachine: {
+    type: Boolean,
+    required: true
+  }
+})
 const toast = useToast()
-import { ref, onMounted } from 'vue'
+
 let valueToPush = ref(null)
 let queue = ref([])
 let history = ref([])
-let autoMachine = ref(true)
+let operationString = ref('')
+
 /**
  * Add a value to the queue.
  *
  * @param {number} value - The value to add.
  */
 let push = (value) => {
-  if (!valueToPush.value) {
+  if (!valueToPush.value && !props.autoMachine) {
     toast.add({
       severity: 'warning',
       summary: 'Push Warning',
       detail: 'You need to enter a number to proceed.',
-      life: 3000
+      life: 10000
     })
 
     return
@@ -42,7 +50,7 @@ let add = () => {
       severity: 'warning',
       summary: 'Add Warning',
       detail: 'The queue needs at least two items to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -62,7 +70,7 @@ let sub = () => {
       severity: 'warning',
       summary: 'Sub Warning',
       detail: 'The queue needs at least two items to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -81,7 +89,7 @@ let mul = () => {
       severity: 'warning',
       summary: 'Mul Warning',
       detail: 'The queue needs at least two items to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -100,7 +108,7 @@ let div = () => {
       severity: 'warning',
       summary: 'Div Warning',
       detail: 'The queue needs at least two items to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -119,7 +127,7 @@ let dup = () => {
       severity: 'warning',
       summary: 'Dup Warning',
       detail: 'The queue needs at least one item to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -137,13 +145,12 @@ let pop = () => {
       severity: 'warning',
       summary: 'Pop Warning',
       detail: 'The queue needs at least one item to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
-  queue.value.splice(0, 1)
-
   updateHistory('POP', queue.value[0], null)
+  queue.value.splice(0, 1)
 }
 
 /**
@@ -155,7 +162,7 @@ let swap = () => {
       severity: 'warning',
       summary: 'Swap Warning',
       detail: 'The queue needs at least two items to proceed.',
-      life: 3000
+      life: 10000
     })
     return
   }
@@ -166,11 +173,59 @@ let swap = () => {
   updateHistory('SWAP', queue.value[1], queue.value[0])
 }
 
+let startMachine = () => {
+  if (!operationString.value) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Machine Warning',
+      detail: 'You need to enter a string to proceed.',
+      life: 10000
+    })
+
+    return
+  }
+  let operationStringAux = operationString.value.split(' ')
+  for (let i = 0; i < operationStringAux.length; i++) {
+    switch (operationStringAux[i]) {
+      case 'PUSH':
+        push(+operationStringAux[i + 1])
+        i++
+        break
+      case 'ADD':
+        add()
+        break
+      case 'SUB':
+        sub()
+        break
+      case 'MUL':
+        mul()
+        break
+      case 'DIV':
+        div()
+        break
+      case 'DUP':
+        dup()
+        break
+      case 'POP':
+        pop()
+        break
+      case 'SWAP':
+        swap()
+        break
+      default:
+        break
+    }
+  }
+
+  console.log(queue.value)
+}
+
 let updateHistory = (operation, value, result) => {
   history.value.unshift({
     operation: operation,
     value: value,
-    result: result
+    result: result,
+    date: new Date()
   })
 
   if (history.value.length >= 15) {
@@ -188,8 +243,26 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="operator-machine-page-container">
-    <div class="operator-machine-container">
+  <div class="operator-machine-page-container" :class="autoMachine ? 'auto-machine-container' : ''">
+    <div class="operator-machine-container" v-if="autoMachine">
+      <div class="input-container">
+        <InputText type="text" v-model="operationString" />
+        <Button label="SEND" @click="startMachine()" />
+      </div>
+      <Fieldset legend="Queue" v-if="queue.length">
+        <div class="queue-list-container">
+          <div
+            class="queue-list-item"
+            v-for="(item, index) of queue"
+            v-tooltip.top="`Element - ${index + 1}`"
+          >
+            {{ item }}
+          </div>
+        </div>
+      </Fieldset>
+    </div>
+
+    <div class="operator-machine-container" v-if="!autoMachine">
       <div class="input-container">
         <InputNumber v-model="valueToPush" inputId="integeronly" class="w-64" />
         <Button label="PUSH" @click="push(valueToPush)" />
@@ -216,46 +289,8 @@ onMounted(() => {
         <Button label="SWAP" class="operation-button" @click="swap" />
       </div>
     </div>
-    <div class="history-container" v-if="history.length > 0">
-      <div>History</div>
-      <div v-for="historyItem of history">
-        <div
-          v-if="
-            historyItem.operation == 'PUSH' ||
-            historyItem.operation == 'DUP' ||
-            historyItem.operation == 'POP'
-          "
-          class="history-item"
-        >
-          <span>
-            {{ historyItem.operation }}
-          </span>
-          <span>
-            {{ historyItem.value }}
-          </span>
-        </div>
-        <div v-else-if="historyItem.operation == 'SWAP'" class="history-item">
-          <span>
-            {{ historyItem.operation }}
-          </span>
-          <span>
-            {{ historyItem.value }}
-            <i class="pi pi-arrow-right-arrow-left"></i>
-            {{ historyItem.result }}
-          </span>
-        </div>
-        <div v-else class="history-item">
-          <span>
-            {{ historyItem.operation }}
-          </span>
-          <span>
-            {{ historyItem.value }}
-          </span>
-          <span>
-            {{ historyItem.result }}
-          </span>
-        </div>
-      </div>
+    <div class="machine-history-container">
+      <History :fullHistory="true" :autoMachine="autoMachine" :history="history" />
     </div>
   </div>
 </template>
@@ -264,6 +299,10 @@ onMounted(() => {
 .operator-machine-page-container {
   display: flex;
   flex-direction: row;
+}
+
+.auto-machine-container {
+  flex-direction: column;
 }
 
 .operator-machine-page-container .operator-machine-container {
@@ -277,11 +316,18 @@ onMounted(() => {
   padding: 32px;
 }
 
+.auto-machine-container .operator-machine-container {
+  width: 100%;
+  border: 0;
+}
+
 .operator-machine-page-container .operator-machine-container .input-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .operator-machine-page-container .operator-machine-container .queue-list-container {
@@ -319,32 +365,33 @@ onMounted(() => {
   width: 30%;
 }
 
-.operator-machine-page-container .history-container {
-  display: flex;
-  flex-direction: column;
+.operator-machine-page-container .machine-history-container {
   width: 45%;
-  padding-left: 24px;
-  height: 500px;
-  overflow: auto;
 }
 
-.operator-machine-page-container .history-container div:first-child {
-  margin-bottom: 12px;
+.auto-machine-container .machine-history-container {
+  width: 100%;
 }
 
-.operator-machine-page-container .history-container .history-item {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
-}
+@media only screen and (max-width: 800px) {
+  .operator-machine-page-container {
+    flex-direction: column;
+  }
 
-.operator-machine-page-container .history-container .history-item span:first-child {
-  background-color: #10b981;
-  padding: 8px;
-  border-radius: 8px;
-  color: #fff;
+  .operator-machine-page-container.auto-machine-container .operator-machine-container {
+    padding: 0;
+  }
+  .operator-machine-page-container .operator-machine-container {
+    padding: 32px;
+    width: 100%;
+  }
+
+  .operator-machine-page-container .operator-machine-container .input-container {
+    margin-bottom: 0;
+  }
+
+  .operator-machine-page-container .machine-history-container {
+    width: 100%;
+  }
 }
 </style>
