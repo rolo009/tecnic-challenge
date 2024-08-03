@@ -3,16 +3,30 @@ import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import Fieldset from 'primevue/fieldset'
 
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 import { ref, onMounted } from 'vue'
 let valueToPush = ref(null)
 let queue = ref([])
 let history = ref([])
+let autoMachine = ref(true)
 /**
  * Add a value to the queue.
  *
  * @param {number} value - The value to add.
  */
 let push = (value) => {
+  if (!valueToPush.value) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Push Warning',
+      detail: 'You need to enter a number to proceed.',
+      life: 3000
+    })
+
+    return
+  }
   queue.value.unshift(value)
   valueToPush.value = null
 
@@ -23,6 +37,15 @@ let push = (value) => {
  * Add the top two values of the queue and replace them with the result.
  */
 let add = () => {
+  if (queue.value.length < 2) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Add Warning',
+      detail: 'The queue needs at least two items to proceed.',
+      life: 3000
+    })
+    return
+  }
   let addAux = 0
   addAux = queue.value[0] + queue.value[1]
   updateHistory('ADD', queue.value[0] + ' + ' + queue.value[1], addAux)
@@ -34,6 +57,15 @@ let add = () => {
  * Subtract the second top value of the queue from the top value and replace them with the result.
  */
 let sub = () => {
+  if (queue.value.length < 2) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Sub Warning',
+      detail: 'The queue needs at least two items to proceed.',
+      life: 3000
+    })
+    return
+  }
   let subAux = 0
   subAux = queue.value[0] - queue.value[1]
   updateHistory('SUB', queue.value[0] + ' - ' + queue.value[1], subAux)
@@ -44,6 +76,15 @@ let sub = () => {
  * Multiply the top two values of the queue and replace them with the result.
  */
 let mul = () => {
+  if (queue.value.length < 2) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Mul Warning',
+      detail: 'The queue needs at least two items to proceed.',
+      life: 3000
+    })
+    return
+  }
   let mulAux = 0
   mulAux = queue.value[0] * queue.value[1]
   updateHistory('MUL', queue.value[0] + ' * ' + queue.value[1], mulAux)
@@ -54,6 +95,15 @@ let mul = () => {
  * Divide the top value of the queue by the second top value and replace them with the result.
  */
 let div = () => {
+  if (queue.value.length < 2) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Div Warning',
+      detail: 'The queue needs at least two items to proceed.',
+      life: 3000
+    })
+    return
+  }
   let divAux = 0
   divAux = queue.value[0] / queue.value[1]
   updateHistory('DIV', queue.value[0] + ' * ' + queue.value[1], divAux)
@@ -64,6 +114,15 @@ let div = () => {
  * Duplicate the top value of the queue.
  */
 let dup = () => {
+  if (queue.value.length < 1) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Dup Warning',
+      detail: 'The queue needs at least one item to proceed.',
+      life: 3000
+    })
+    return
+  }
   push(queue.value[0])
 
   updateHistory('DUP', queue.value[0], null)
@@ -73,15 +132,33 @@ let dup = () => {
  * Remove the top value of the queue.
  */
 let pop = () => {
+  if (queue.value.length < 1) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Pop Warning',
+      detail: 'The queue needs at least one item to proceed.',
+      life: 3000
+    })
+    return
+  }
   queue.value.splice(0, 1)
 
-  updateHistory('DUP', queue.value[0], null)
+  updateHistory('POP', queue.value[0], null)
 }
 
 /**
  * Swap the positions of the top two values of the queue.
  */
 let swap = () => {
+  if (queue.value.length < 2) {
+    toast.add({
+      severity: 'warning',
+      summary: 'Swap Warning',
+      detail: 'The queue needs at least two items to proceed.',
+      life: 3000
+    })
+    return
+  }
   let valAux = queue.value[0]
   queue.value[0] = queue.value[1]
   queue.value[1] = valAux
@@ -90,11 +167,15 @@ let swap = () => {
 }
 
 let updateHistory = (operation, value, result) => {
-  history.value.push({
+  history.value.unshift({
     operation: operation,
     value: value,
     result: result
   })
+
+  if (history.value.length >= 15) {
+    history.value.pop()
+  }
   localStorage.setItem('operations-history', JSON.stringify(history.value))
 }
 
@@ -111,7 +192,7 @@ onMounted(() => {
     <div class="operator-machine-container">
       <div class="input-container">
         <InputNumber v-model="valueToPush" inputId="integeronly" class="w-64" />
-        <Button label="PUSH" @click="push(valueToPush)" :disabled="!valueToPush" />
+        <Button label="PUSH" @click="push(valueToPush)" />
       </div>
 
       <Fieldset legend="Queue" v-if="queue.length">
@@ -135,9 +216,9 @@ onMounted(() => {
         <Button label="SWAP" class="operation-button" @click="swap" />
       </div>
     </div>
-    <div class="history-container">
+    <div class="history-container" v-if="history.length > 0">
       <div>History</div>
-      <div v-for="historyItem of history.reverse()">
+      <div v-for="historyItem of history">
         <div
           v-if="
             historyItem.operation == 'PUSH' ||
@@ -243,6 +324,8 @@ onMounted(() => {
   flex-direction: column;
   width: 45%;
   padding-left: 24px;
+  height: 500px;
+  overflow: auto;
 }
 
 .operator-machine-page-container .history-container div:first-child {

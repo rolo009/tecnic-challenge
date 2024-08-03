@@ -1,5 +1,6 @@
 <script setup>
-import OperatorMachine from './components/__tests__/OperatorMachine.vue'
+import OperatorMachine from './components/OperatorMachine.vue'
+import Toast from 'primevue/toast'
 </script>
 
 <template>
@@ -7,6 +8,7 @@ import OperatorMachine from './components/__tests__/OperatorMachine.vue'
 
   <main class="p-8">
     <div class="flex justify-center text-4xl mb-6">Operator Machine</div>
+    <Toast />
     <OperatorMachine />
   </main>
 </template>
