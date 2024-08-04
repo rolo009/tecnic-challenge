@@ -1,3 +1,7 @@
 input {
   padding: 8px;
 }
+
+.operator-machine-page-container .operator-machine-container .input-container .p-inputtext {
+  width: 60%;
+}
