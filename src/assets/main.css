@@ -5,9 +5,3 @@ input {
 .operator-machine-page-container .operator-machine-container .input-container .p-inputtext {
   width: 60%;
 }
-
-@media only screen and (max-width: 800px) {
-  .operator-machine-page-container .operator-machine-container .input-container .p-inputtext {
-    width: 80%;
-  }
-}

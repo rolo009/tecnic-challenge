@@ -136,7 +136,7 @@ let cleanHistory = () => {
   }
   .auto-history-items .history-items-container {
     padding: 0px;
-    height: calc(100vh - 220px);
+    height: 100%;
   }
 
   .history-title {
@@ -144,7 +144,7 @@ let cleanHistory = () => {
   }
 
   .manual-history-container .history-items-container {
-    height: calc(100vh - 500px) !important;
+    height: 100% !important;
   }
 }
 </style>

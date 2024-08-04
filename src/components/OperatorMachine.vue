@@ -6,6 +6,8 @@ import Button from 'primevue/button'
 import Fieldset from 'primevue/fieldset'
 import { useToast } from 'primevue/usetoast'
 import History from './History.vue'
+import OverlayPanel from 'primevue/overlaypanel'
+
 const props = defineProps({
   autoMachine: {
     type: Boolean,
@@ -18,6 +20,7 @@ let valueToPush = ref(null)
 let queue = ref([])
 let history = ref([])
 let operationString = ref('')
+const operationsInformation = ref()
 
 /**
  * Add a value to the queue.
@@ -238,6 +241,11 @@ let cleanHistory = () => {
   history.value = []
 }
 
+const toggle = (event) => {
+  console.log(132)
+  operationsInformation.value.toggle(event)
+}
+
 onMounted(() => {
   let historyAux = localStorage.getItem('operations-history')
   if (historyAux) {
@@ -250,12 +258,25 @@ onMounted(() => {
   <div class="operator-machine-page-container" :class="autoMachine ? 'auto-machine-container' : ''">
     <div class="operator-machine-container" v-if="autoMachine">
       <div class="input-container">
-        <InputText
-          type="text"
-          v-model="operationString"
-          placeholder="PUSH 3 PUSH 4 ADD DUP MUL POP SUB"
-        />
+        <Button icon="pi pi-info-circle" severity="secondary" text rounded @click="toggle" />
+
+        <InputText type="text" v-model="operationString" placeholder="Insert Operations" />
         <Button label="SEND" @click="startMachine()" />
+
+        <OverlayPanel ref="operationsInformation">
+          <b>PUSH X:</b> Empurra o valor X para a queue. <br /><b>ADD:</b> Adiciona os dois valores
+          no topo da queue e empurra o resultado de volta.<br /><b>SUB:</b> Subtrai o valor no topo
+          da queue do próximo valor e empurra o resultado de volta.<br /><b>MUL:</b> Multiplica os
+          dois valores no topo da queue e empurra o resultado de volta.<br /><b>DIV:</b> Divide o
+          valor no topo da queue pelo próximo valor e empurra o resultado de volta. <br /><b
+            >DUP:</b
+          >
+          Duplica o valor no topo da queue.<br /><b>POP:</b> Remove o valor no topo da queue.<br /><b
+            >SWAP:</b
+          >
+          Inverte a posição dos dois valores no topo da queue. <br /><b>Exemplo de entrada:</b>​​
+          "PUSH 3 PUSH 4 ADD DUP MUL POP SUB"
+        </OverlayPanel>
       </div>
       <Fieldset legend="Queue" v-if="queue.length">
         <div class="queue-list-container">
@@ -272,7 +293,12 @@ onMounted(() => {
 
     <div class="operator-machine-container" v-if="!autoMachine">
       <div class="input-container">
-        <InputNumber v-model="valueToPush" inputId="integeronly" class="w-64" placeholder="3" />
+        <InputNumber
+          v-model="valueToPush"
+          inputId="integeronly"
+          class="w-64"
+          placeholder="Insert a Number"
+        />
         <Button label="PUSH" @click="push(valueToPush)" />
       </div>
 
@@ -295,6 +321,22 @@ onMounted(() => {
         <Button label="DUP" class="operation-button" @click="dup" />
         <Button label="POP" class="operation-button" @click="pop" />
         <Button label="SWAP" class="operation-button" @click="swap" />
+      </div>
+      <div class="info-button">
+        <Button icon="pi pi-info-circle" severity="secondary" text rounded @click="toggle" />
+        <OverlayPanel ref="operationsInformation">
+          <b>PUSH X:</b> Empurra o valor X para a queue. <br /><b>ADD:</b> Adiciona os dois valores
+          no topo da queue e empurra o resultado de volta.<br /><b>SUB:</b> Subtrai o valor no topo
+          da queue do próximo valor e empurra o resultado de volta.<br /><b>MUL:</b> Multiplica os
+          dois valores no topo da queue e empurra o resultado de volta.<br /><b>DIV:</b> Divide o
+          valor no topo da queue pelo próximo valor e empurra o resultado de volta. <br /><b
+            >DUP:</b
+          >
+          Duplica o valor no topo da queue.<br /><b>POP:</b> Remove o valor no topo da queue.<br /><b
+            >SWAP:</b
+          >
+          Inverte a posição dos dois valores no topo da queue.
+        </OverlayPanel>
       </div>
     </div>
     <div class="machine-history-container">
@@ -328,6 +370,13 @@ onMounted(() => {
   border-radius: 12px;
   padding: 32px;
   max-height: 450px;
+  position: relative;
+}
+
+.operator-machine-page-container .operator-machine-container .info-button {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
 }
 
 .auto-machine-container .operator-machine-container {
@@ -396,7 +445,7 @@ onMounted(() => {
     padding: 0;
   }
   .operator-machine-page-container .operator-machine-container {
-    padding: 32px;
+    padding: 12px;
     width: 100%;
   }
 
