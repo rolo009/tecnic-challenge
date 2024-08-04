@@ -30,9 +30,11 @@ let autoMachine = ref(true)
   width: 100%;
   padding: 32px;
 }
+
 .application-header h1 {
   margin: 0;
 }
+
 .application-content {
   padding: 32px;
 }
