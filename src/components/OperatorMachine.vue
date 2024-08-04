@@ -243,7 +243,7 @@ let startMachine = () => {
 
   //Execute each operation
   for (let i = 0; i < operationStringAux.length; i++) {
-    switch (operationStringAux[i]) {
+    switch (operationStringAux[i].toUpperCase()) {
       case 'PUSH':
         push(+operationStringAux[i + 1])
         i++
