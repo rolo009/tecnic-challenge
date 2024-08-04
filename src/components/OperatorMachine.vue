@@ -28,9 +28,11 @@ const operationsInformation = ref()
  * @param {number} value - The value to add.
  */
 let push = (value) => {
+  // Check if the value to push is not provided and autoMachine is not enabled
   if (!valueToPush.value && !props.autoMachine) {
+    // Display a warning message if no value is provided
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Push Warning',
       detail: 'You need to enter a number to proceed.',
       life: 10000
@@ -38,9 +40,13 @@ let push = (value) => {
 
     return
   }
+  // Add the value to the top of the queue
   queue.value.unshift(value)
+
+  // Reset the input value
   valueToPush.value = null
 
+  // Update the history with the push operation
   updateHistory('PUSH', value, null)
 }
 
@@ -48,19 +54,24 @@ let push = (value) => {
  * Add the top two values of the queue and replace them with the result.
  */
 let add = () => {
+  // Check if the queue has fewer than two items
   if (queue.value.length < 2) {
+    // Display a warning message if the queue has less than two items
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Add Warning',
-      detail: 'The queue needs at least two items to proceed.',
-      life: 10000
+      detail: 'The queue needs at least two items to proceed.'
     })
     return
   }
-  let addAux = 0
-  addAux = queue.value[0] + queue.value[1]
+
+  // Perform the addition of the top two values
+  let addAux = queue.value[0] + queue.value[1]
+
+  // Update the history with the add operation
   updateHistory('ADD', queue.value[0] + ' + ' + queue.value[1], addAux)
 
+  // Replace the top two values with the result
   queue.value.splice(0, 2, addAux)
 }
 
@@ -68,18 +79,25 @@ let add = () => {
  * Subtract the second top value of the queue from the top value and replace them with the result.
  */
 let sub = () => {
+  // Check if the queue has fewer than two items
   if (queue.value.length < 2) {
+    // Display a warning message if the queue has less than two items
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Sub Warning',
       detail: 'The queue needs at least two items to proceed.',
       life: 10000
     })
     return
   }
-  let subAux = 0
-  subAux = queue.value[0] - queue.value[1]
+
+  // Perform the subtraction of the top two value
+  let subAux = queue.value[0] - queue.value[1]
+
+  // Update the history with the sub operation
   updateHistory('SUB', queue.value[0] + ' - ' + queue.value[1], subAux)
+
+  // Replace the top two values with the result
   queue.value.splice(0, 2, subAux)
 }
 
@@ -87,18 +105,25 @@ let sub = () => {
  * Multiply the top two values of the queue and replace them with the result.
  */
 let mul = () => {
+  // Check if the queue has fewer than two items
   if (queue.value.length < 2) {
+    // Display a warning message if the queue has less than two items
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Mul Warning',
       detail: 'The queue needs at least two items to proceed.',
       life: 10000
     })
     return
   }
-  let mulAux = 0
-  mulAux = queue.value[0] * queue.value[1]
+
+  // Perform the multiplication of the top two values
+  let mulAux = queue.value[0] * queue.value[1]
+
+  // Update the history with the mul operation
   updateHistory('MUL', queue.value[0] + ' * ' + queue.value[1], mulAux)
+
+  // Replace the top two values with the result
   queue.value.splice(0, 2, mulAux)
 }
 
@@ -106,18 +131,24 @@ let mul = () => {
  * Divide the top value of the queue by the second top value and replace them with the result.
  */
 let div = () => {
+  // Check if the queue has fewer than two items
   if (queue.value.length < 2) {
+    // Display a warning message if the queue has less than two items
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Div Warning',
       detail: 'The queue needs at least two items to proceed.',
       life: 10000
     })
     return
   }
-  let divAux = 0
-  divAux = queue.value[0] / queue.value[1]
-  updateHistory('DIV', queue.value[0] + ' * ' + queue.value[1], divAux)
+  // Perform the division of the top two values
+  let divAux = queue.value[0] / queue.value[1]
+
+  // Update the history with the div operation
+  updateHistory('DIV', queue.value[0] + ' / ' + queue.value[1], divAux)
+
+  // Replace the top two values with the result
   queue.value.splice(0, 2, divAux)
 }
 
@@ -125,17 +156,22 @@ let div = () => {
  * Duplicate the top value of the queue.
  */
 let dup = () => {
+  // Check if the queue has fewer than one item
   if (queue.value.length < 1) {
+    // Display a warning message if the queue has less than one item
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Dup Warning',
       detail: 'The queue needs at least one item to proceed.',
       life: 10000
     })
     return
   }
+
+  // Push the top value onto the queue again
   push(queue.value[0])
 
+  // Update the history with the dup operation
   updateHistory('DUP', queue.value[0], null)
 }
 
@@ -143,16 +179,22 @@ let dup = () => {
  * Remove the top value of the queue.
  */
 let pop = () => {
+  // Check if the queue has fewer than one item
   if (queue.value.length < 1) {
+    // Display a warning message if the queue has less than one item
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Pop Warning',
       detail: 'The queue needs at least one item to proceed.',
       life: 10000
     })
     return
   }
+
+  // Update the history with the pop operation
   updateHistory('POP', queue.value[0], null)
+
+  // Remove the top value from the queue
   queue.value.splice(0, 1)
 }
 
@@ -160,26 +202,35 @@ let pop = () => {
  * Swap the positions of the top two values of the queue.
  */
 let swap = () => {
+  // Check if the queue has fewer than two items
   if (queue.value.length < 2) {
+    // Display a warning message if the queue has less than two items
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Swap Warning',
       detail: 'The queue needs at least two items to proceed.',
       life: 10000
     })
     return
   }
+
+  // Swap the first two items in the queue
   let valAux = queue.value[0]
   queue.value[0] = queue.value[1]
   queue.value[1] = valAux
 
+  // Update the history with the swap operation
   updateHistory('SWAP', queue.value[1], queue.value[0])
 }
 
+/**
+ * Start the machine by processing the operation string.
+ */
 let startMachine = () => {
+  // Check if the operation string is empty
   if (!operationString.value) {
     toast.add({
-      severity: 'warning',
+      severity: 'warn',
       summary: 'Machine Warning',
       detail: 'You need to enter a string to proceed.',
       life: 10000
@@ -187,7 +238,10 @@ let startMachine = () => {
 
     return
   }
+  // Split the operation string into an array of operations
   let operationStringAux = operationString.value.split(' ')
+
+  //Execute each operation
   for (let i = 0; i < operationStringAux.length; i++) {
     switch (operationStringAux[i]) {
       case 'PUSH':
@@ -220,10 +274,18 @@ let startMachine = () => {
     }
   }
 
+  // Clear the operation string input
   operationString.value = ''
 }
 
+/**
+ * Update the history of operations with a new entry.
+ * @param {string} operation - The operation performed.
+ * @param {*} value - The value associated with the operation.
+ * @param {*} result - The result of the operation.
+ */
 let updateHistory = (operation, value, result) => {
+  // Add the new operation to the beginning of the history array
   history.value.unshift({
     operation: operation,
     value: value,
@@ -231,21 +293,33 @@ let updateHistory = (operation, value, result) => {
     date: new Date()
   })
 
+  // Keep the history array to a maximum of 15 entries
   if (history.value.length >= 15) {
     history.value.pop()
   }
+
+  // Save the updated history to local storage
   localStorage.setItem('operations-history', JSON.stringify(history.value))
 }
 
+/**
+ * Clear the operation history.
+ */
 let cleanHistory = () => {
   history.value = []
 }
 
+/**
+ * Toggle the overlay panel of the operations information.
+ * @param {Event} event - The event that triggered the toggle.
+ */
 const toggle = (event) => {
-  console.log(132)
   operationsInformation.value.toggle(event)
 }
 
+/**
+ * Load the operation history from local storage when the component is mounted.
+ */
 onMounted(() => {
   let historyAux = localStorage.getItem('operations-history')
   if (historyAux) {
