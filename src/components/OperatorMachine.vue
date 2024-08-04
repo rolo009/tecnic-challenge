@@ -26,10 +26,11 @@ const operationsInformation = ref()
  * Add a value to the queue.
  *
  * @param {number} value - The value to add.
+ * @param {boolean} checkNumber - Boolean to validate if number check is needed.
  */
-let push = (value) => {
+let push = (value, checkNumber = true) => {
   // Check if the value to push is not provided and autoMachine is not enabled
-  if (!valueToPush.value && !props.autoMachine) {
+  if (!valueToPush.value && !props.autoMachine && checkNumber) {
     // Display a warning message if no value is provided
     toast.add({
       severity: 'warn',
@@ -169,7 +170,7 @@ let dup = () => {
   }
 
   // Push the top value onto the queue again
-  push(queue.value[0])
+  push(queue.value[0], false)
 
   // Update the history with the dup operation
   updateHistory('DUP', queue.value[0], null)
