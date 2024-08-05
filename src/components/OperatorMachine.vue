@@ -41,6 +41,18 @@ let push = (value, checkNumber = true) => {
 
     return
   }
+
+  if (isNaN(value)) {
+    // Display a warning message if no value is provided
+    toast.add({
+      severity: 'warn',
+      summary: 'Push Warning',
+      detail: 'You need to enter a number after PUSH. E.g. PUSH 3',
+      life: 10000
+    })
+
+    return
+  }
   // Add the value to the top of the queue
   queue.value.unshift(value)
 
