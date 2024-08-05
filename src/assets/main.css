@@ -5,3 +5,12 @@ input {
 .operator-machine-page-container .operator-machine-container .input-container .p-inputtext {
   width: 60%;
 }
+
+@media only screen and (max-width: 800px) {
+  .p-toast {
+    width: 95%;
+    max-width: 25rem;
+    right: 10px !important;
+    top: 10px !important;
+  }
+}
