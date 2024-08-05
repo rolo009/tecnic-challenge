@@ -18,10 +18,6 @@ const props = defineProps({
   }
 })
 
-const formatDate = (value) => {
-  return moment(String(value)).format('DD/MM/YYYY')
-}
-
 let cleanHistory = () => {
   localStorage.removeItem('operations-history')
   emit('cleanHistory')
